@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "Sprout",
+    "slug": "sprout-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#40534D"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.sprout.app",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Upload inspiration photos for custom cake designs",
+        "NSCameraUsageDescription": "Take photos of cake designs"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#40534D"
+      },
+      "package": "com.sprout.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-build-properties",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#40534D",
+          "image": "./assets/splash.png",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "extra": {
+      "cognitoUserPoolId": "us-east-2_0G98rbgVS",
+      "cognitoUserPoolClientId": "186g873aq6n8f7of44cabapuus",
+      "awsRegion": "us-east-2",
+      "apiBaseUrl": "https://sf3uwg4dh6.execute-api.us-east-2.amazonaws.com/prod",
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}

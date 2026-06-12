@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Owner can only access their own documents
+    function isOwner(ownerId) {
+      return isSignedIn() && request.auth.uid == ownerId;
+    }
+
+    // Customers
+    match /customers/{customerId} {
+      allow read, write: if isSignedIn() && isOwner(resource.data.ownerId);
+      allow create: if isSignedIn() && isOwner(request.resource.data.ownerId);
+    }
+
+    // Threads
+    match /threads/{threadId} {
+      allow read, write: if isSignedIn() && isOwner(resource.data.ownerId);
+      allow create: if isSignedIn() && isOwner(request.resource.data.ownerId);
+    }
+
+    // Messages
+    match /messages/{messageId} {
+      allow read, write: if isSignedIn() && isOwner(resource.data.ownerId);
+      allow create: if isSignedIn() && isOwner(request.resource.data.ownerId);
+    }
+
+    // Orders
+    match /orders/{orderId} {
+      allow read, write: if isSignedIn() && isOwner(resource.data.ownerId);
+      allow create: if isSignedIn() && isOwner(request.resource.data.ownerId);
+    }
+
+    // Owner profile — only the owner can access their own profile
+    match /ownerProfile/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Pricing configs
+    match /pricingConfigs/{configId} {
+      allow read, write: if isSignedIn() && isOwner(resource.data.ownerId);
+      allow create: if isSignedIn() && isOwner(request.resource.data.ownerId);
+    }
+
+    // Edit/correction logs for the learning loop
+    match /editLogs/{logId} {
+      allow read, write: if isSignedIn() && isOwner(resource.data.ownerId);
+      allow create: if isSignedIn() && isOwner(request.resource.data.ownerId);
+    }
+
+    // App-level config (read-only from client, written only server-side)
+    match /appConfig/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
