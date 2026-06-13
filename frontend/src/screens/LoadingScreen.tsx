@@ -1,13 +1,16 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '../constants/colors';
+import GrowthStageIcon from '../components/botanical/GrowthStageIcon';
 
 export default function LoadingScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>🌱</Text>
+      <View style={styles.iconWrap}>
+        <GrowthStageIcon stage="seed" size={72} color={COLORS.parchment} />
+      </View>
       <Text style={styles.wordmark}>Sprout</Text>
-      <ActivityIndicator color={COLORS.cream} size="small" style={styles.spinner} />
+      <Text style={styles.tagline}>Your custom cake business, organized.</Text>
     </View>
   );
 }
@@ -15,21 +18,26 @@ export default function LoadingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.deepGreen,
+    backgroundColor: COLORS.forest,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 32,
   },
-  logo: {
-    fontSize: 64,
-    marginBottom: 12,
+  iconWrap: {
+    marginBottom: 24,
   },
   wordmark: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: COLORS.cream,
-    letterSpacing: 2,
+    fontFamily: 'Fraunces_800ExtraBold',
+    fontSize: 42,
+    color: COLORS.parchment,
+    letterSpacing: 1,
+    marginBottom: 10,
   },
-  spinner: {
-    marginTop: 32,
+  tagline: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    color: COLORS.sage,
+    textAlign: 'center',
+    lineHeight: 22,
   },
 });

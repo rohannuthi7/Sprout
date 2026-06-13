@@ -1,7 +1,14 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  Clipboard,
+  Globe,
+  MessageCircle,
+  Mail,
+  Instagram,
+} from 'lucide-react-native';
 import { COLORS } from '../constants/colors';
+import GrowthStageIcon from './botanical/GrowthStageIcon';
 import type { Thread } from '../types';
 
 interface Props {
@@ -10,13 +17,17 @@ interface Props {
   onPress: () => void;
 }
 
-const CHANNEL_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
-  paste: 'clipboard-outline',
-  web_intake: 'globe-outline',
-  sms: 'chatbubble-outline',
-  email: 'mail-outline',
-  instagram: 'logo-instagram',
-};
+function ChannelIcon({ channel, color }: { channel: string; color: string }) {
+  const props = { size: 13, color, strokeWidth: 1.8 };
+  switch (channel) {
+    case 'paste':      return <Clipboard {...props} />;
+    case 'web_intake': return <Globe {...props} />;
+    case 'sms':        return <MessageCircle {...props} />;
+    case 'email':      return <Mail {...props} />;
+    case 'instagram':  return <Instagram {...props} />;
+    default:           return <MessageCircle {...props} />;
+  }
+}
 
 function timeAgo(iso: string | null | undefined): string {
   if (!iso) return '';
@@ -27,17 +38,26 @@ function timeAgo(iso: string | null | undefined): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
+// Map thread status to a growth stage for the icon
+function stageForThread(thread: Thread): string {
+  // Use order stage if embedded, otherwise derive from thread status
+  return (thread as Thread & { order?: { stage?: string } }).order?.stage ?? thread.status ?? 'inquiry';
+}
+
 export default function ThreadItem({ thread, customerName, onPress }: Props) {
-  const icon = CHANNEL_ICON[thread.channel] ?? 'chatbubble-outline';
   const isUnread = thread.status === 'needs_reply';
+  const stage = stageForThread(thread);
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
+      {/* Avatar */}
       <View style={[styles.avatar, isUnread && styles.avatarUnread]}>
         <Text style={styles.avatarText}>
           {customerName.charAt(0).toUpperCase()}
         </Text>
       </View>
+
+      {/* Content */}
       <View style={styles.content}>
         <View style={styles.topRow}>
           <Text style={[styles.name, isUnread && styles.nameUnread]} numberOfLines={1}>
@@ -49,11 +69,16 @@ export default function ThreadItem({ thread, customerName, onPress }: Props) {
           {thread.rollingSummary || 'New inquiry'}
         </Text>
         <View style={styles.bottomRow}>
-          <Ionicons name={icon} size={12} color={COLORS.textMuted} style={styles.channelIcon} />
+          <ChannelIcon channel={thread.channel} color={COLORS.sage} />
           <Text style={styles.channelLabel}>{thread.channel.replace('_', ' ')}</Text>
         </View>
       </View>
-      {isUnread && <View style={styles.unreadDot} />}
+
+      {/* Stage icon + unread dot */}
+      <View style={styles.trailingStack}>
+        <GrowthStageIcon stage={stage} size={22} />
+        {isUnread && <View style={styles.unreadDot} />}
+      </View>
     </TouchableOpacity>
   );
 }
@@ -64,26 +89,28 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingVertical: 14,
     paddingHorizontal: 16,
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.palm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
+    borderBottomColor: COLORS.wood,
   },
   avatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: COLORS.sageTan,
+    backgroundColor: COLORS.fern,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
   avatarUnread: {
-    backgroundColor: COLORS.lightGreen,
+    backgroundColor: COLORS.wood,
+    borderWidth: 2,
+    borderColor: COLORS.mustard,
   },
   avatarText: {
+    fontFamily: 'DMSans_700Bold',
     fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.deepGreen,
+    color: COLORS.parchment,
   },
   content: {
     flex: 1,
@@ -94,43 +121,48 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   name: {
+    fontFamily: 'DMSans_500Medium',
     fontSize: 15,
-    fontWeight: '500',
-    color: COLORS.textPrimary,
+    color: COLORS.parchment,
     flex: 1,
     marginRight: 8,
   },
   nameUnread: {
-    fontWeight: '700',
+    fontFamily: 'DMSans_700Bold',
   },
   time: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 12,
-    color: COLORS.textMuted,
+    color: COLORS.sage,
   },
   summary: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: COLORS.sage,
     lineHeight: 18,
     marginBottom: 4,
   },
   bottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  channelIcon: {
-    marginRight: 4,
+    gap: 4,
   },
   channelLabel: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 11,
-    color: COLORS.textMuted,
+    color: COLORS.sage,
     textTransform: 'capitalize',
   },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.primary,
+  trailingStack: {
+    alignItems: 'center',
+    gap: 4,
     marginLeft: 8,
-    marginTop: 4,
+    marginTop: 2,
+  },
+  unreadDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: COLORS.mustard,
   },
 });

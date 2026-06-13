@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { TriangleAlert } from 'lucide-react-native';
 import { COLORS } from '../constants/colors';
 import type { Order } from '../types';
 
@@ -18,20 +18,20 @@ function formatDate(dateStr: string | null): string {
 export default function PrepSheet({ order, customerName }: Props) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Prep Sheet</Text>
-      <Text style={styles.subtitle}>{customerName}</Text>
-
       {order.dietary.length > 0 && (
         <View style={styles.allergyBlock}>
           <View style={styles.allergyHeader}>
-            <Ionicons name="warning" size={20} color={COLORS.danger} />
-            <Text style={styles.allergyTitle}>⚠️ DIETARY / ALLERGIES</Text>
+            <TriangleAlert size={20} color={COLORS.terracotta} />
+            <Text style={styles.allergyTitle}>ALLERGY / DIETARY — VERIFY BEFORE BAKING</Text>
           </View>
           {order.dietary.map((item, i) => (
             <Text key={i} style={styles.allergyItem}>• {item}</Text>
           ))}
         </View>
       )}
+
+      <Text style={styles.label}>PREP SHEET</Text>
+      <Text style={styles.title}>{customerName}</Text>
 
       <View style={styles.section}>
         <Row label="Due Date" value={formatDate(order.dueDate)} />
@@ -95,19 +95,20 @@ const rowStyles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
+    borderBottomColor: COLORS.wood,
+    opacity: 0.9,
   },
   label: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    fontWeight: '500',
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 13,
+    color: COLORS.sage,
   },
   value: {
+    fontFamily: 'DMSans_600SemiBold',
     fontSize: 14,
-    color: COLORS.textPrimary,
-    fontWeight: '600',
+    color: COLORS.parchment,
     textAlign: 'right',
     flex: 1,
     marginLeft: 16,
@@ -116,79 +117,91 @@ const rowStyles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   highlight: {
-    color: COLORS.primary,
-    fontSize: 16,
+    fontFamily: 'Fraunces_700Bold',
+    color: COLORS.mustard,
+    fontSize: 17,
   },
 });
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.forest,
   },
   content: {
-    padding: 20,
     paddingBottom: 40,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: COLORS.deepGreen,
+  label: {
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 10,
+    color: COLORS.sage,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    paddingHorizontal: 20,
+    paddingTop: 20,
     marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    marginBottom: 20,
+  title: {
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 26,
+    color: COLORS.parchment,
+    paddingHorizontal: 20,
+    marginBottom: 24,
   },
   allergyBlock: {
-    backgroundColor: '#FFF0EE',
-    borderWidth: 2,
-    borderColor: COLORS.danger,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 20,
+    backgroundColor: COLORS.forest,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.terracotta,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    marginBottom: 8,
   },
   allergyHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginBottom: 8,
   },
   allergyTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: COLORS.danger,
-    letterSpacing: 0.5,
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 10,
+    color: COLORS.terracotta,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    flex: 1,
   },
   allergyItem: {
-    fontSize: 14,
-    color: COLORS.danger,
-    fontWeight: '600',
-    lineHeight: 22,
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 15,
+    color: COLORS.terracotta,
+    lineHeight: 24,
+    paddingLeft: 4,
   },
   section: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.palm,
+    marginHorizontal: 16,
     borderRadius: 12,
     padding: 14,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.textMuted,
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 10,
+    color: COLORS.sage,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 10,
   },
   listItem: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 14,
-    color: COLORS.textPrimary,
+    color: COLORS.parchment,
     lineHeight: 24,
   },
   designNotes: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 14,
-    color: COLORS.textPrimary,
+    color: COLORS.parchment,
     lineHeight: 22,
   },
 });

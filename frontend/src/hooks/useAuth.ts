@@ -4,6 +4,9 @@ import {
   signUp as amplifySignUp,
   signOut as amplifySignOut,
   confirmSignUp as amplifyConfirmSignUp,
+  resendSignUpCode as amplifyResendSignUpCode,
+  resetPassword as amplifyResetPassword,
+  confirmResetPassword as amplifyConfirmResetPassword,
   getCurrentUser,
   fetchAuthSession,
 } from 'aws-amplify/auth';
@@ -47,9 +50,25 @@ export function useAuth() {
   }
 
   async function signIn(email: string, password: string): Promise<void> {
-    const result = await amplifySignIn({ username: email, password });
+    let result;
+    try {
+      result = await amplifySignIn({ username: email, password });
+    } catch (err: unknown) {
+      // Amplify keeps a partial session in localStorage after a failed attempt.
+      // If the next call happens before it clears, it throws UserAlreadyAuthenticatedException.
+      // Sign out to purge the stale state and retry once.
+      if (err instanceof Error && err.name === 'UserAlreadyAuthenticatedException') {
+        await amplifySignOut();
+        result = await amplifySignIn({ username: email, password });
+      } else {
+        throw err;
+      }
+    }
     if (result.nextStep.signInStep !== 'DONE') {
-      throw new Error(`Sign-in requires additional step: ${result.nextStep.signInStep}`);
+      const step = result.nextStep.signInStep;
+      const stepErr = new Error(step);
+      stepErr.name = 'AuthNextStepRequired';
+      throw stepErr;
     }
     await loadUser();
   }
@@ -63,11 +82,27 @@ export function useAuth() {
     await amplifyConfirmSignUp({ username: email, confirmationCode: code });
   }
 
+  async function resendCode(email: string): Promise<void> {
+    await amplifyResendSignUpCode({ username: email });
+  }
+
+  async function forgotPassword(email: string): Promise<void> {
+    await amplifyResetPassword({ username: email });
+  }
+
+  async function confirmForgotPassword(
+    email: string,
+    code: string,
+    newPassword: string,
+  ): Promise<void> {
+    await amplifyConfirmResetPassword({ username: email, confirmationCode: code, newPassword });
+  }
+
   async function signOut(): Promise<void> {
     await amplifySignOut();
   }
 
-  return { user, loading, signIn, signUp, confirmSignUp, signOut };
+  return { user, loading, signIn, signUp, confirmSignUp, resendCode, forgotPassword, confirmForgotPassword, signOut };
 }
 
 // Utility used by the API client to get the current ID token.

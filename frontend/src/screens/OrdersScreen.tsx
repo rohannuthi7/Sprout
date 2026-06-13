@@ -72,21 +72,30 @@ export default function OrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.forest },
   header: {
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.forest,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.wood,
   },
-  title: { fontSize: 24, fontWeight: '800', color: COLORS.deepGreen },
-  subtitle: { fontSize: 13, color: COLORS.textMuted, marginTop: 2 },
+  title: {
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 24,
+    color: COLORS.parchment,
+  },
+  subtitle: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+    color: COLORS.sage,
+    marginTop: 2,
+  },
   list: { padding: 16 },
   sectionLabel: {
+    fontFamily: 'DMSans_600SemiBold',
     fontSize: 11,
-    fontWeight: '700',
-    color: COLORS.textMuted,
+    color: COLORS.sage,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginTop: 8,

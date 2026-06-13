@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+import { MinusCircle, PlusCircle } from 'lucide-react-native';
 import { COLORS } from '../constants/colors';
 import { callGetPricingConfig, callSavePricingConfig } from '../api/client';
 
@@ -168,7 +168,8 @@ export default function PricingConfigScreen() {
                   value={entry.size}
                   onChangeText={v => setSizes(prev => prev.map((s, j) => j === i ? { ...s, size: v } : s))}
                   placeholder="Size label"
-                  placeholderTextColor={COLORS.textMuted}
+                  placeholderTextColor={COLORS.sage}
+                  keyboardAppearance="dark"
                 />
                 <Text style={styles.rowSep}>$</Text>
                 <TextInput
@@ -177,13 +178,14 @@ export default function PricingConfigScreen() {
                   onChangeText={v => setSizes(prev => prev.map((s, j) => j === i ? { ...s, price: v } : s))}
                   keyboardType="decimal-pad"
                   placeholder="0"
-                  placeholderTextColor={COLORS.textMuted}
+                  placeholderTextColor={COLORS.sage}
+                  keyboardAppearance="dark"
                 />
                 <TouchableOpacity
                   onPress={() => setSizes(prev => prev.filter((_, j) => j !== i))}
                   style={styles.removeBtn}
                 >
-                  <Ionicons name="remove-circle" size={22} color={COLORS.danger} />
+                  <MinusCircle size={22} color={COLORS.terracotta} strokeWidth={1.8} />
                 </TouchableOpacity>
               </View>
             ))}
@@ -191,7 +193,7 @@ export default function PricingConfigScreen() {
               style={styles.addRowBtn}
               onPress={() => setSizes(prev => [...prev, { size: '', price: '' }])}
             >
-              <Ionicons name="add-circle-outline" size={18} color={COLORS.primary} />
+              <PlusCircle size={18} color={COLORS.mustard} strokeWidth={1.8} />
               <Text style={styles.addRowText}>Add size</Text>
             </TouchableOpacity>
           </View>
@@ -207,7 +209,8 @@ export default function PricingConfigScreen() {
                   value={entry.name}
                   onChangeText={v => setAddOns(prev => prev.map((a, j) => j === i ? { ...a, name: v } : a))}
                   placeholder="Add-on name"
-                  placeholderTextColor={COLORS.textMuted}
+                  placeholderTextColor={COLORS.sage}
+                  keyboardAppearance="dark"
                 />
                 <Text style={styles.rowSep}>$</Text>
                 <TextInput
@@ -222,7 +225,7 @@ export default function PricingConfigScreen() {
                   onPress={() => setAddOns(prev => prev.filter((_, j) => j !== i))}
                   style={styles.removeBtn}
                 >
-                  <Ionicons name="remove-circle" size={22} color={COLORS.danger} />
+                  <MinusCircle size={22} color={COLORS.terracotta} strokeWidth={1.8} />
                 </TouchableOpacity>
               </View>
             ))}
@@ -230,7 +233,7 @@ export default function PricingConfigScreen() {
               style={styles.addRowBtn}
               onPress={() => setAddOns(prev => [...prev, { name: '', price: '' }])}
             >
-              <Ionicons name="add-circle-outline" size={18} color={COLORS.primary} />
+              <PlusCircle size={18} color={COLORS.mustard} strokeWidth={1.8} />
               <Text style={styles.addRowText}>Add add-on</Text>
             </TouchableOpacity>
           </View>
@@ -248,7 +251,8 @@ export default function PricingConfigScreen() {
                   onChangeText={v => setRushFees(prev => prev.map((r, j) => j === i ? { ...r, days: v } : r))}
                   keyboardType="number-pad"
                   placeholder="7"
-                  placeholderTextColor={COLORS.textMuted}
+                  placeholderTextColor={COLORS.sage}
+                  keyboardAppearance="dark"
                 />
                 <Text style={styles.rowLabel}>days →</Text>
                 <TextInput
@@ -257,14 +261,15 @@ export default function PricingConfigScreen() {
                   onChangeText={v => setRushFees(prev => prev.map((r, j) => j === i ? { ...r, feePercent: v } : r))}
                   keyboardType="decimal-pad"
                   placeholder="20"
-                  placeholderTextColor={COLORS.textMuted}
+                  placeholderTextColor={COLORS.sage}
+                  keyboardAppearance="dark"
                 />
                 <Text style={styles.rowLabel}>%</Text>
                 <TouchableOpacity
                   onPress={() => setRushFees(prev => prev.filter((_, j) => j !== i))}
                   style={styles.removeBtn}
                 >
-                  <Ionicons name="remove-circle" size={22} color={COLORS.danger} />
+                  <MinusCircle size={22} color={COLORS.terracotta} strokeWidth={1.8} />
                 </TouchableOpacity>
               </View>
             ))}
@@ -272,7 +277,7 @@ export default function PricingConfigScreen() {
               style={styles.addRowBtn}
               onPress={() => setRushFees(prev => [...prev, { days: '', feePercent: '' }])}
             >
-              <Ionicons name="add-circle-outline" size={18} color={COLORS.primary} />
+              <PlusCircle size={18} color={COLORS.mustard} strokeWidth={1.8} />
               <Text style={styles.addRowText}>Add rule</Text>
             </TouchableOpacity>
           </View>
@@ -287,7 +292,8 @@ export default function PricingConfigScreen() {
               onChangeText={setDeliveryFee}
               keyboardType="decimal-pad"
               placeholder="0"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={COLORS.sage}
+              keyboardAppearance="dark"
             />
             <Text style={styles.label}>Deposit Required (%)</Text>
             <TextInput
@@ -296,7 +302,8 @@ export default function PricingConfigScreen() {
               onChangeText={setDepositPercent}
               keyboardType="decimal-pad"
               placeholder="50"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={COLORS.sage}
+              keyboardAppearance="dark"
             />
           </View>
 
@@ -314,40 +321,62 @@ export default function PricingConfigScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.forest },
   flex: { flex: 1 },
   loadingBox: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll: { padding: 16, paddingBottom: 48 },
   section: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.palm,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: COLORS.textMuted,
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 11,
+    color: COLORS.sage,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.2,
     marginBottom: 8,
   },
-  hint: { fontSize: 12, color: COLORS.textMuted, lineHeight: 18, marginBottom: 12 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.textPrimary, marginBottom: 6 },
+  hint: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 12,
+    color: COLORS.sage,
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  label: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 13,
+    color: COLORS.parchment,
+    marginBottom: 6,
+  },
   input: {
+    backgroundColor: COLORS.canopy,
     borderWidth: 1.5,
-    borderColor: COLORS.border,
+    borderColor: COLORS.wood,
     borderRadius: 10,
     padding: 10,
+    fontFamily: 'DMSans_400Regular',
     fontSize: 15,
-    color: COLORS.textPrimary,
+    color: COLORS.parchment,
     marginBottom: 8,
   },
   priceInput: { width: 80, textAlign: 'right' },
   smallInput: { width: 60, textAlign: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  rowSep: { fontSize: 15, color: COLORS.textMuted, paddingBottom: 8 },
-  rowLabel: { fontSize: 13, color: COLORS.textMuted },
+  rowSep: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 15,
+    color: COLORS.sage,
+    paddingBottom: 8,
+  },
+  rowLabel: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+    color: COLORS.sage,
+  },
   removeBtn: { paddingBottom: 8 },
   addRowBtn: {
     flexDirection: 'row',
@@ -355,14 +384,22 @@ const styles = StyleSheet.create({
     gap: 6,
     marginTop: 4,
   },
-  addRowText: { fontSize: 14, color: COLORS.primary, fontWeight: '600' },
+  addRowText: {
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 14,
+    color: COLORS.mustard,
+  },
   saveBtn: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.mustard,
     borderRadius: 50,
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: 8,
   },
   saveBtnDisabled: { opacity: 0.5 },
-  saveBtnText: { color: COLORS.cream, fontWeight: '700', fontSize: 16 },
+  saveBtnText: {
+    fontFamily: 'DMSans_700Bold',
+    color: COLORS.forest,
+    fontSize: 16,
+  },
 });

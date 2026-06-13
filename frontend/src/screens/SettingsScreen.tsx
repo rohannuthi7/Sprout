@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+import { CheckCircle2, CalendarDays } from 'lucide-react-native';
 import { COLORS } from '../constants/colors';
 import { API_BASE_URL } from '../lib/aws';
 import { useAuth } from '../hooks/useAuth';
@@ -96,12 +96,14 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Settings</Text>
+      </View>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={styles.scroll}>
-          <Text style={styles.title}>Settings</Text>
 
           {/* Business Info */}
           <View style={styles.section}>
@@ -112,7 +114,8 @@ export default function SettingsScreen() {
               value={businessName}
               onChangeText={setBusinessName}
               placeholder="Your bakery name"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={COLORS.sage}
+              keyboardAppearance="dark"
             />
             <Text style={styles.label}>Weekly Order Capacity</Text>
             <TextInput
@@ -121,7 +124,8 @@ export default function SettingsScreen() {
               onChangeText={setWeeklyCapacity}
               keyboardType="number-pad"
               placeholder="5"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={COLORS.sage}
+              keyboardAppearance="dark"
             />
             <TouchableOpacity
               style={[styles.btn, savingProfile && styles.btnDisabled]}
@@ -137,7 +141,7 @@ export default function SettingsScreen() {
             <Text style={styles.sectionTitle}>Google Calendar</Text>
             {profile?.calendarConnection ? (
               <View style={styles.connectedBadge}>
-                <Ionicons name="checkmark-circle" size={18} color={COLORS.primary} />
+                <CheckCircle2 size={18} color={COLORS.mustard} strokeWidth={2} />
                 <Text style={styles.connectedText}>Calendar connected</Text>
               </View>
             ) : (
@@ -146,7 +150,7 @@ export default function SettingsScreen() {
                 onPress={connectCalendar}
                 disabled={connectingCalendar}
               >
-                <Ionicons name="calendar-outline" size={18} color={COLORS.cream} />
+                <CalendarDays size={18} color={COLORS.forest} strokeWidth={2} />
                 <Text style={styles.btnText}>
                   {connectingCalendar ? 'Opening…' : 'Connect Google Calendar'}
                 </Text>
@@ -211,41 +215,54 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.forest },
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: COLORS.forest,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.wood,
+  },
+  headerTitle: {
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 24,
+    color: COLORS.parchment,
+  },
   flex: { flex: 1 },
   scroll: { padding: 16, paddingBottom: 48 },
-  title: { fontSize: 26, fontWeight: '800', color: COLORS.deepGreen, marginBottom: 24 },
   section: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.palm,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: COLORS.textMuted,
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 11,
+    color: COLORS.sage,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.2,
     marginBottom: 12,
   },
   label: {
+    fontFamily: 'DMSans_500Medium',
     fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
+    color: COLORS.parchment,
     marginBottom: 6,
   },
   input: {
+    backgroundColor: COLORS.canopy,
     borderWidth: 1.5,
-    borderColor: COLORS.border,
+    borderColor: COLORS.wood,
     borderRadius: 10,
     padding: 12,
+    fontFamily: 'DMSans_400Regular',
     fontSize: 15,
-    color: COLORS.textPrimary,
+    color: COLORS.parchment,
     marginBottom: 12,
   },
   btn: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.mustard,
     borderRadius: 50,
     paddingVertical: 13,
     paddingHorizontal: 20,
@@ -255,52 +272,70 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   btnDisabled: { opacity: 0.5 },
-  btnText: { color: COLORS.cream, fontWeight: '700', fontSize: 15 },
+  btnText: {
+    fontFamily: 'DMSans_700Bold',
+    color: COLORS.forest,
+    fontSize: 15,
+  },
   outlineBtn: {
     borderWidth: 1.5,
-    borderColor: COLORS.primary,
+    borderColor: COLORS.wood,
     borderRadius: 50,
     paddingVertical: 12,
     paddingHorizontal: 20,
     alignItems: 'center',
     marginBottom: 8,
   },
-  outlineBtnText: { color: COLORS.primary, fontWeight: '700', fontSize: 15 },
+  outlineBtnText: {
+    fontFamily: 'DMSans_600SemiBold',
+    color: COLORS.parchment,
+    fontSize: 15,
+  },
   connectedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     marginBottom: 8,
   },
-  connectedText: { color: COLORS.primary, fontWeight: '600', fontSize: 14 },
+  connectedText: {
+    fontFamily: 'DMSans_600SemiBold',
+    color: COLORS.mustard,
+    fontSize: 14,
+  },
   hint: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 12,
-    color: COLORS.textMuted,
+    color: COLORS.sage,
     lineHeight: 18,
     marginTop: 8,
   },
   pricingNote: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: COLORS.sage,
     marginBottom: 10,
   },
   linkBox: {
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.canopy,
     borderRadius: 10,
     padding: 12,
     marginTop: 8,
   },
   linkText: {
     fontSize: 13,
-    color: COLORS.primary,
+    color: COLORS.mustard,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   dangerBtn: {
     borderWidth: 1.5,
-    borderColor: COLORS.danger,
+    borderColor: COLORS.terracotta,
     borderRadius: 50,
     paddingVertical: 13,
     alignItems: 'center',
   },
-  dangerBtnText: { color: COLORS.danger, fontWeight: '700', fontSize: 15 },
+  dangerBtnText: {
+    fontFamily: 'DMSans_700Bold',
+    color: COLORS.terracotta,
+    fontSize: 15,
+  },
 });

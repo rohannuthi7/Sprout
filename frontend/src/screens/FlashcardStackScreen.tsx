@@ -9,10 +9,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+import { X } from 'lucide-react-native';
 import { COLORS } from '../constants/colors';
 import FlashCard from '../components/FlashCard';
 import UndoToast from '../components/UndoToast';
+import GrowthStageIcon from '../components/botanical/GrowthStageIcon';
 import { useUIStore } from '../stores/uiStore';
 import { useThreads } from '../hooks/useThreads';
 import {
@@ -27,7 +28,7 @@ import {
 import type { FlashCardData, Customer, Order, Message, Thread, AIEvalResult, OrderStage } from '../types';
 
 const DECLINE_DRAFT =
-  "Hi! Thank you so much for reaching out. Unfortunately, I'm not able to take on this order at this time — I'm fully booked for that period. I hope you find the perfect cake! 🎂";
+  "Hi! Thank you so much for reaching out. Unfortunately, I'm not able to take on this order at this time — I'm fully booked for that period. I hope you find the perfect cake!";
 
 export default function FlashcardStackScreen() {
   const navigation = useNavigation();
@@ -39,16 +40,7 @@ export default function FlashcardStackScreen() {
   const lastActionRef = useRef<{ type: string; threadId: string } | null>(null);
 
   // Derive a stable primitive so the effect only re-runs when the set of
-  // threads genuinely changes. Array.filter() returns a new reference every
-  // render, so using the array itself as a dependency re-fires the effect on
-  // every render (including those caused by setCards/setLoading inside
-  // buildCards), creating the infinite loop.
-  //
-  // lastMessageAt is included alongside id because FlashCard renders
-  // thread.rollingSummary, which the backend updates with each new message.
-  // Without lastMessageAt, a new message on an existing thread would change
-  // the thread data in the poll but leave needsReplyKey unchanged, so
-  // buildCards would never re-run and the card would show a stale summary.
+  // threads genuinely changes.
   const needsReplyKey = needsReply.map(t => `${t.id}:${t.lastMessageAt}`).join(',');
 
   useEffect(() => {
@@ -130,7 +122,7 @@ export default function FlashcardStackScreen() {
 
         if (result.hasConflict) {
           Alert.alert(
-            '⚠️ Calendar Conflict',
+            'Calendar Conflict',
             `You already have ${result.conflictCount} order(s) on that day. The order has been confirmed and added to your calendar.`,
             [{ text: 'OK' }]
           );
@@ -220,7 +212,7 @@ export default function FlashcardStackScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color={COLORS.primary} style={{ flex: 1 }} />
+        <ActivityIndicator size="large" color={COLORS.mustard} style={{ flex: 1 }} />
       </SafeAreaView>
     );
   }
@@ -230,11 +222,11 @@ export default function FlashcardStackScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.closeBar}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
-            <Ionicons name="close" size={22} color={COLORS.textPrimary} />
+            <X size={20} color={COLORS.parchment} strokeWidth={2} />
           </TouchableOpacity>
         </View>
         <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>✅</Text>
+          <GrowthStageIcon stage="bloom" size={80} color={COLORS.mustard} />
           <Text style={styles.emptyTitle}>All done!</Text>
           <Text style={styles.emptyText}>No more messages waiting for a reply.</Text>
           <TouchableOpacity style={styles.doneBtn} onPress={() => navigation.goBack()}>
@@ -249,9 +241,11 @@ export default function FlashcardStackScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.closeBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
-          <Ionicons name="close" size={22} color={COLORS.textPrimary} />
+          <X size={20} color={COLORS.parchment} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={styles.counter}>{cards.length} remaining</Text>
+        <Text style={styles.counter}>
+          {cards.length} remaining
+        </Text>
       </View>
 
       <View style={styles.stackArea}>
@@ -269,7 +263,7 @@ export default function FlashcardStackScreen() {
 
       {processing && (
         <View style={styles.processingOverlay}>
-          <ActivityIndicator color={COLORS.cream} />
+          <ActivityIndicator color={COLORS.mustard} />
         </View>
       )}
 
@@ -279,7 +273,7 @@ export default function FlashcardStackScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.forest },
   closeBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -288,14 +282,20 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.surface,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.palm,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.wood,
   },
-  counter: { fontSize: 14, color: COLORS.textMuted, fontWeight: '600' },
+  counter: {
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 14,
+    color: COLORS.sage,
+  },
   stackArea: {
     flex: 1,
     alignItems: 'center',
@@ -307,17 +307,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
+    gap: 12,
   },
-  emptyIcon: { fontSize: 64, marginBottom: 16 },
-  emptyTitle: { fontSize: 22, fontWeight: '800', color: COLORS.textPrimary, marginBottom: 8 },
-  emptyText: { fontSize: 15, color: COLORS.textSecondary, textAlign: 'center', marginBottom: 32 },
+  emptyTitle: {
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 26,
+    color: COLORS.parchment,
+  },
+  emptyText: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    color: COLORS.sage,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
   doneBtn: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.mustard,
     borderRadius: 50,
     paddingVertical: 14,
-    paddingHorizontal: 32,
+    paddingHorizontal: 36,
   },
-  doneBtnText: { color: COLORS.cream, fontWeight: '700', fontSize: 16 },
+  doneBtnText: {
+    fontFamily: 'DMSans_700Bold',
+    color: COLORS.forest,
+    fontSize: 16,
+  },
   processingOverlay: {
     position: 'absolute',
     top: 0,
@@ -326,6 +340,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.overlay,
+    backgroundColor: COLORS.scrim,
   },
 });

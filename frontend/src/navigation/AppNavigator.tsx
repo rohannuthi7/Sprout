@@ -1,8 +1,9 @@
 import React from 'react';
+import { StatusBar } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MessageSquare, Layers, CalendarDays, SlidersHorizontal } from 'lucide-react-native';
 import { COLORS } from '../constants/colors';
 import { useAuth } from '../hooks/useAuth';
 
@@ -40,23 +41,25 @@ function MainTabs() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: COLORS.surface,
-          borderTopColor: COLORS.border,
+          backgroundColor: COLORS.forest,
+          borderTopColor: COLORS.wood,
           borderTopWidth: 1,
-          // bottom is the home-indicator inset (~34pt on iPhone X+, 0 on older devices)
           paddingBottom: bottom,
           height: 56 + bottom,
         },
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.textMuted,
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+        tabBarActiveTintColor: COLORS.mustard,
+        tabBarInactiveTintColor: COLORS.sage,
+        tabBarLabelStyle: {
+          fontFamily: 'DMSans_600SemiBold',
+          fontSize: 11,
+        },
         tabBarIcon: ({ color, size }) => {
-          const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
-            Inbox: 'mail-outline',
-            Orders: 'calendar-outline',
-            Settings: 'settings-outline',
+          const icons: Record<string, React.ReactNode> = {
+            Inbox:    <MessageSquare size={size} color={color} strokeWidth={1.8} />,
+            Orders:   <CalendarDays size={size} color={color} strokeWidth={1.8} />,
+            Settings: <SlidersHorizontal size={size} color={color} strokeWidth={1.8} />,
           };
-          return <Ionicons name={icons[route.name] ?? 'ellipse-outline'} size={size} color={color} />;
+          return icons[route.name] ?? <Layers size={size} color={color} strokeWidth={1.8} />;
         },
       })}
     >
@@ -75,32 +78,57 @@ export default function AppNavigator() {
   }
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? (
-        <>
-          <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen
-            name="FlashcardStack"
-            component={FlashcardStackScreen}
-            options={{
-              presentation: 'modal',
-              animation: 'slide_from_bottom',
-            }}
-          />
-          <Stack.Screen
-            name="OrderDetail"
-            component={OrderDetailScreen}
-            options={{ headerShown: true, headerTitle: 'Order Details', headerTintColor: COLORS.primary }}
-          />
-          <Stack.Screen
-            name="PricingConfig"
-            component={PricingConfigScreen}
-            options={{ headerShown: true, headerTitle: 'Pricing Config', headerTintColor: COLORS.primary }}
-          />
-        </>
-      ) : (
-        <Stack.Screen name="Auth" component={AuthScreen} />
-      )}
-    </Stack.Navigator>
+    <>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {user ? (
+          <>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen
+              name="FlashcardStack"
+              component={FlashcardStackScreen}
+              options={{
+                presentation: 'modal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="OrderDetail"
+              component={OrderDetailScreen}
+              options={{
+                headerShown: true,
+                headerTitle: 'Order Details',
+                headerStyle: { backgroundColor: COLORS.forest },
+                headerTintColor: COLORS.parchment,
+                headerTitleStyle: {
+                  fontFamily: 'Fraunces_700Bold',
+                  fontSize: 18,
+                  color: COLORS.parchment,
+                },
+                headerBackTitle: '',
+              }}
+            />
+            <Stack.Screen
+              name="PricingConfig"
+              component={PricingConfigScreen}
+              options={{
+                headerShown: true,
+                headerTitle: 'Pricing Config',
+                headerStyle: { backgroundColor: COLORS.forest },
+                headerTintColor: COLORS.parchment,
+                headerTitleStyle: {
+                  fontFamily: 'Fraunces_700Bold',
+                  fontSize: 18,
+                  color: COLORS.parchment,
+                },
+                headerBackTitle: '',
+              }}
+            />
+          </>
+        ) : (
+          <Stack.Screen name="Auth" component={AuthScreen} />
+        )}
+      </Stack.Navigator>
+    </>
   );
 }

@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { TriangleAlert, Clock } from 'lucide-react-native';
 import { COLORS } from '../constants/colors';
+import GrowthStageIcon from './botanical/GrowthStageIcon';
 import type { Order } from '../types';
 
 interface Props {
@@ -22,50 +23,67 @@ function formatDate(dateStr: string | null): string {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
-  inquiry: { bg: '#EDF3EC', text: COLORS.primary },
-  quoted: { bg: '#FEF3E8', text: '#A0602E' },
-  confirming: { bg: '#FEF0DB', text: '#A06820' },
-  confirmed: { bg: '#EDF7F0', text: '#2E7D32' },
-  completed: { bg: '#E8EAF6', text: '#3949AB' },
-};
-
 export default function OrderCard({ order, customerName, onPress }: Props) {
   const days = daysUntil(order.dueDate);
-  const stageStyle = STAGE_COLORS[order.stage] ?? { bg: COLORS.sageTan, text: COLORS.deepGreen };
   const hasAllergy = order.dietary.length > 0;
-  const isUrgent = days !== null && days <= 3 && days >= 0;
+  const isUrgent = days !== null && days <= 5 && days >= 0;
+  const isVeryUrgent = days !== null && days <= 3 && days >= 0;
+
+  const leadTimeText = days === null
+    ? null
+    : days === 0
+    ? 'Due today'
+    : days < 0
+    ? `${Math.abs(days)}d overdue`
+    : `Due in ${days} day${days === 1 ? '' : 's'}`;
+
+  const leadTimeColor = isVeryUrgent ? COLORS.terracotta : isUrgent ? COLORS.mustard : COLORS.sage;
 
   return (
-    <TouchableOpacity style={[styles.card, isUrgent && styles.cardUrgent]} onPress={onPress} activeOpacity={0.7}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.customerName}>{customerName}</Text>
-          <Text style={styles.date}>{formatDate(order.dueDate)}</Text>
-        </View>
-        <View style={[styles.stageBadge, { backgroundColor: stageStyle.bg }]}>
-          <Text style={[styles.stageText, { color: stageStyle.text }]}>
-            {order.stage}
-          </Text>
-        </View>
-      </View>
-
-      {days !== null && (
+    <TouchableOpacity
+      style={[styles.card, isVeryUrgent && styles.cardUrgent]}
+      onPress={onPress}
+      activeOpacity={0.75}
+    >
+      {/* ── Lead time — top, prominent ── */}
+      {leadTimeText && (
         <View style={styles.leadTimeRow}>
-          <Ionicons
-            name={isUrgent ? 'alert-circle' : 'time-outline'}
-            size={14}
-            color={isUrgent ? COLORS.danger : COLORS.textMuted}
-          />
-          <Text style={[styles.leadTime, isUrgent && styles.leadTimeUrgent]}>
-            {days === 0 ? 'Due today' : days < 0 ? `${Math.abs(days)}d overdue` : `Due in ${days} days`}
+          {isUrgent
+            ? <TriangleAlert size={13} color={leadTimeColor} strokeWidth={2} />
+            : <Clock size={13} color={leadTimeColor} strokeWidth={1.8} />
+          }
+          <Text style={[styles.leadTime, { color: leadTimeColor }]}>
+            {leadTimeText}
           </Text>
         </View>
       )}
 
+      {/* ── Header row ── */}
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.customerName}>{customerName}</Text>
+          <Text style={styles.date}>{formatDate(order.dueDate)}</Text>
+        </View>
+        <View style={styles.stageBadge}>
+          <GrowthStageIcon stage={order.stage} size={20} />
+          <Text style={styles.stageText}>{order.stage}</Text>
+        </View>
+      </View>
+
+      {/* ── Allergy strip — forest-inset ── */}
+      {hasAllergy && (
+        <View style={styles.allergyStrip}>
+          <TriangleAlert size={13} color={COLORS.terracotta} strokeWidth={2.5} />
+          <Text style={styles.allergyText}>
+            {order.dietary.join(', ')}
+          </Text>
+        </View>
+      )}
+
+      {/* ── Detail pills ── */}
       <View style={styles.details}>
         {order.size && <Text style={styles.detail}>{order.size}</Text>}
-        {order.servings && <Text style={styles.detail}>{order.servings} servings</Text>}
+        {order.servings && <Text style={styles.detail}>{order.servings} srv</Text>}
         {order.flavors.length > 0 && (
           <Text style={styles.detail}>{order.flavors.join(', ')}</Text>
         )}
@@ -73,15 +91,6 @@ export default function OrderCard({ order, customerName, onPress }: Props) {
           <Text style={styles.detail}>{order.fulfillment}</Text>
         )}
       </View>
-
-      {hasAllergy && (
-        <View style={styles.allergyRow}>
-          <Ionicons name="warning" size={13} color={COLORS.danger} />
-          <Text style={styles.allergyText}>
-            {order.dietary.join(', ')}
-          </Text>
-        </View>
-      )}
 
       {order.quotedPrice !== null && (
         <Text style={styles.price}>${order.quotedPrice.toFixed(2)}</Text>
@@ -92,91 +101,103 @@ export default function OrderCard({ order, customerName, onPress }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.palm,
     borderRadius: 16,
-    padding: 16,
+    padding: 14,
     marginBottom: 12,
-    boxShadow: '0 2px 8px rgba(64, 83, 77, 0.06)',
-    elevation: 3,
+    shadowColor: '#0A1208',
+    shadowOpacity: 0.35,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 5,
   },
   cardUrgent: {
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.danger,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.terracotta,
+  },
+  leadTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: 10,
+  },
+  leadTime: {
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 15,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 10,
   },
+  headerLeft: { flex: 1, marginRight: 12 },
   customerName: {
+    fontFamily: 'DMSans_700Bold',
     fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: COLORS.parchment,
     marginBottom: 2,
   },
   date: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: COLORS.sage,
   },
   stageBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  stageText: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  leadTimeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-    gap: 4,
+    gap: 5,
+    backgroundColor: COLORS.canopy,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.wood,
   },
-  leadTime: {
+  stageText: {
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 11,
+    color: COLORS.sage,
+    textTransform: 'capitalize',
+  },
+  // Forest-inset strip so terracotta text passes AA contrast
+  allergyStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: COLORS.forest,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.terracotta,
+  },
+  allergyText: {
+    fontFamily: 'DMSans_600SemiBold',
     fontSize: 12,
-    color: COLORS.textMuted,
-  },
-  leadTimeUrgent: {
-    color: COLORS.danger,
-    fontWeight: '600',
+    color: COLORS.terracotta,
+    flex: 1,
   },
   details: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 5,
     marginBottom: 8,
   },
   detail: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 12,
-    color: COLORS.textSecondary,
-    backgroundColor: COLORS.background,
+    color: COLORS.sage,
+    backgroundColor: COLORS.canopy,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
   },
-  allergyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#FFF0EE',
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  allergyText: {
-    fontSize: 12,
-    color: COLORS.danger,
-    fontWeight: '600',
-  },
   price: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.primary,
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 16,
+    color: COLORS.mustard,
     textAlign: 'right',
   },
 });

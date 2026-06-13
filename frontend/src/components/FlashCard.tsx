@@ -10,8 +10,9 @@ import {
   View,
   Animated,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { TriangleAlert, Calendar, Users, Move, Truck, ArrowLeft, ArrowUp, ArrowRight } from 'lucide-react-native';
 import { COLORS } from '../constants/colors';
+import GrowthStageIcon from './botanical/GrowthStageIcon';
 import type { FlashCardData, OrderStage } from '../types';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -48,6 +49,7 @@ export default function FlashCard({ data, isTop, onSwipeRight, onSwipeLeft, onSw
       : ''
   );
 
+  // ── PanResponder — all gesture logic kept exactly as-is ──────────────────
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => isTop,
@@ -107,6 +109,9 @@ export default function FlashCard({ data, isTop, onSwipeRight, onSwipeLeft, onSw
   const rightLabel = STAGE_RIGHT_LABEL[currentStage];
   const isConfirmBook = currentStage === 'confirming' || currentStage === 'confirmed';
 
+  const hasAllergy = (order?.dietary ?? []).length > 0;
+  const hasSafetyFlags = (evalResult?.safetyFlags ?? []).length > 0;
+
   return (
     <Animated.View
       style={[
@@ -118,17 +123,43 @@ export default function FlashCard({ data, isTop, onSwipeRight, onSwipeLeft, onSw
     >
       {/* Swipe indicator overlays */}
       <Animated.View style={[styles.swipeIndicator, styles.swipeRight, { opacity: rightOpacity }]}>
-        <Text style={styles.swipeIndicatorText}>{rightLabel}</Text>
+        <Text style={styles.swipeRightText}>{rightLabel}</Text>
       </Animated.View>
       <Animated.View style={[styles.swipeIndicator, styles.swipeLeft, { opacity: leftOpacity }]}>
-        <Text style={styles.swipeIndicatorText}>Park</Text>
+        <Text style={styles.swipeLeftText}>Park</Text>
       </Animated.View>
       <Animated.View style={[styles.swipeIndicator, styles.swipeUp, { opacity: upOpacity }]}>
-        <Text style={styles.swipeIndicatorText}>Decline</Text>
+        <Text style={styles.swipeUpText}>Decline</Text>
       </Animated.View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} nestedScrollEnabled>
-        {/* Header */}
+
+        {/* ── ALLERGY / SAFETY BLOCK — always at top, forest-inset strip ── */}
+        {(hasAllergy || hasSafetyFlags) && (
+          <View style={styles.allergyStrip}>
+            <TriangleAlert size={16} color={COLORS.terracotta} strokeWidth={2.5} />
+            <View style={styles.allergyStripContent}>
+              {hasAllergy && (
+                <>
+                  <Text style={styles.allergyStripTitle}>Dietary / Allergies</Text>
+                  {order!.dietary.map((item, i) => (
+                    <Text key={i} style={styles.allergyStripItem}>{item}</Text>
+                  ))}
+                </>
+              )}
+              {hasSafetyFlags && (
+                <>
+                  <Text style={[styles.allergyStripTitle, hasAllergy && { marginTop: 8 }]}>Attention needed</Text>
+                  {evalResult!.safetyFlags.map((flag, i) => (
+                    <Text key={i} style={styles.allergyStripItem}>{flag}</Text>
+                  ))}
+                </>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* ── Header ── */}
         <View style={styles.header}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{customer.name.charAt(0).toUpperCase()}</Text>
@@ -136,25 +167,13 @@ export default function FlashCard({ data, isTop, onSwipeRight, onSwipeLeft, onSw
           <View style={styles.headerText}>
             <Text style={styles.customerName}>{customer.name}</Text>
             {order?.stage && (
-              <View style={styles.stageBadge}>
+              <View style={styles.stageBadgeRow}>
+                <GrowthStageIcon stage={order.stage} size={18} />
                 <Text style={styles.stageText}>{order.stage}</Text>
               </View>
             )}
           </View>
         </View>
-
-        {/* Safety flags — show prominently at top */}
-        {(evalResult?.safetyFlags ?? []).length > 0 && (
-          <View style={styles.safetyBlock}>
-            <Ionicons name="warning" size={16} color={COLORS.danger} />
-            <View style={styles.safetyContent}>
-              <Text style={styles.safetyTitle}>Attention needed</Text>
-              {evalResult!.safetyFlags.map((flag, i) => (
-                <Text key={i} style={styles.safetyFlag}>• {flag}</Text>
-              ))}
-            </View>
-          </View>
-        )}
 
         {/* Thread summary */}
         {thread.rollingSummary ? (
@@ -166,16 +185,13 @@ export default function FlashCard({ data, isTop, onSwipeRight, onSwipeLeft, onSw
           <View style={styles.orderDetails}>
             <Text style={styles.sectionLabel}>Order Details</Text>
             <View style={styles.detailGrid}>
-              {order.dueDate && <DetailChip icon="calendar-outline" label={order.dueDate} />}
-              {order.servings && <DetailChip icon="people-outline" label={`${order.servings} servings`} />}
-              {order.size && <DetailChip icon="resize-outline" label={order.size} />}
-              {order.fulfillment && <DetailChip icon="car-outline" label={order.fulfillment} />}
+              {order.dueDate && <DetailChip icon="calendar" label={order.dueDate} />}
+              {order.servings && <DetailChip icon="people" label={`${order.servings} servings`} />}
+              {order.size && <DetailChip icon="size" label={order.size} />}
+              {order.fulfillment && <DetailChip icon="truck" label={order.fulfillment} />}
             </View>
             {order.flavors.length > 0 && (
               <Text style={styles.detailText}>Flavors: {order.flavors.join(', ')}</Text>
-            )}
-            {order.dietary.length > 0 && (
-              <Text style={styles.allergyDetail}>⚠️ Dietary: {order.dietary.join(', ')}</Text>
             )}
             {order.designNotes ? (
               <Text style={styles.detailText}>{order.designNotes}</Text>
@@ -188,7 +204,7 @@ export default function FlashCard({ data, isTop, onSwipeRight, onSwipeLeft, onSw
           <View style={styles.missingInfo}>
             <Text style={styles.missingInfoTitle}>Still needed:</Text>
             {evalResult!.missingInfo.map((item, i) => (
-              <Text key={i} style={styles.missingInfoItem}>• {item}</Text>
+              <Text key={i} style={styles.missingInfoItem}>- {item}</Text>
             ))}
           </View>
         )}
@@ -217,8 +233,9 @@ export default function FlashCard({ data, isTop, onSwipeRight, onSwipeLeft, onSw
                 value={quoteValue}
                 onChangeText={setQuoteValue}
                 keyboardType="decimal-pad"
+                keyboardAppearance="dark"
                 placeholder="0.00"
-                placeholderTextColor={COLORS.textMuted}
+                placeholderTextColor={COLORS.sage}
               />
             </View>
           </View>
@@ -233,26 +250,23 @@ export default function FlashCard({ data, isTop, onSwipeRight, onSwipeLeft, onSw
             onChangeText={setDraftReply}
             multiline
             placeholder="Edit draft reply before sending..."
-            placeholderTextColor={COLORS.textMuted}
+            placeholderTextColor={COLORS.sage}
+            keyboardAppearance="dark"
           />
         </View>
 
-        {/* Action hint */}
+        {/* Action hints */}
         <View style={styles.actionHints}>
           <View style={styles.hint}>
-            <Ionicons name="arrow-back" size={14} color={COLORS.sageTan} />
+            <ArrowLeft size={14} color={COLORS.sage} strokeWidth={2} />
             <Text style={styles.hintText}>Park</Text>
           </View>
           <View style={styles.hint}>
-            <Ionicons name="arrow-up" size={14} color={COLORS.terracotta} />
+            <ArrowUp size={14} color={COLORS.terracotta} strokeWidth={2} />
             <Text style={styles.hintText}>Decline</Text>
           </View>
           <View style={styles.hint}>
-            <Ionicons
-              name="arrow-forward"
-              size={14}
-              color={isConfirmBook ? COLORS.primary : COLORS.lightGreen}
-            />
+            <ArrowRight size={14} color={isConfirmBook ? COLORS.mustard : COLORS.mustard} strokeWidth={2} />
             <Text style={styles.hintText}>{rightLabel}</Text>
           </View>
         </View>
@@ -261,10 +275,18 @@ export default function FlashCard({ data, isTop, onSwipeRight, onSwipeLeft, onSw
   );
 }
 
-function DetailChip({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
+type ChipIconName = 'calendar' | 'people' | 'size' | 'truck';
+
+function DetailChip({ icon, label }: { icon: ChipIconName; label: string }) {
+  const iconProps = { size: 12, color: COLORS.sage, strokeWidth: 1.8 };
+  const iconEl = icon === 'calendar' ? <Calendar {...iconProps} />
+    : icon === 'people'   ? <Users {...iconProps} />
+    : icon === 'size'     ? <Move {...iconProps} />
+    : <Truck {...iconProps} />;
+
   return (
     <View style={chipStyles.chip}>
-      <Ionicons name={icon} size={12} color={COLORS.primary} />
+      {iconEl}
       <Text style={chipStyles.label}>{label}</Text>
     </View>
   );
@@ -274,7 +296,7 @@ const chipStyles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.forest,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -283,9 +305,9 @@ const chipStyles = StyleSheet.create({
     marginBottom: 6,
   },
   label: {
+    fontFamily: 'DMSans_500Medium',
     fontSize: 12,
-    color: COLORS.textPrimary,
-    fontWeight: '500',
+    color: COLORS.parchment,
   },
 });
 
@@ -294,154 +316,260 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: SCREEN_WIDTH - 32,
     maxHeight: '90%',
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.palm,
     borderRadius: 24,
-    boxShadow: '0 8px 20px rgba(64, 83, 77, 0.12)',
-    elevation: 10,
+    shadowColor: '#0A1208',
+    shadowOpacity: 0.60,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 20,
+    elevation: 12,
+    overflow: 'hidden',
   },
   cardBehind: {
     transform: [{ scale: 0.95 }, { translateY: 12 }],
     opacity: 0.7,
   },
   scroll: { flex: 1 },
-  scrollContent: { padding: 20, paddingBottom: 32 },
+  scrollContent: { paddingBottom: 32 },
+
+  // ── Allergy strip — forest bg so terracotta text passes AA ──
+  allergyStrip: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.forest,
+    borderBottomWidth: 1.5,
+    borderBottomColor: COLORS.terracotta,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  allergyStripContent: { flex: 1 },
+  allergyStripTitle: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    color: COLORS.terracotta,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  allergyStripItem: {
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 13,
+    color: COLORS.terracotta,
+    lineHeight: 20,
+  },
+
+  // ── Header ──
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    padding: 20,
+    paddingBottom: 12,
   },
   avatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.lightGreen,
+    backgroundColor: COLORS.fern,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  avatarText: { fontSize: 20, fontWeight: '700', color: COLORS.deepGreen },
+  avatarText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 20,
+    color: COLORS.parchment,
+  },
   headerText: { flex: 1 },
-  customerName: { fontSize: 18, fontWeight: '700', color: COLORS.textPrimary },
-  stageBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: COLORS.background,
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+  customerName: {
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 20,
+    color: COLORS.parchment,
+  },
+  stageBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     marginTop: 4,
   },
-  stageText: { fontSize: 11, fontWeight: '700', color: COLORS.primary, textTransform: 'uppercase' },
-  safetyBlock: {
-    flexDirection: 'row',
-    backgroundColor: '#FFF0EE',
-    borderWidth: 1.5,
-    borderColor: COLORS.danger,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 12,
-    gap: 8,
+  stageText: {
+    fontFamily: 'DMSans_600SemiBold',
+    fontSize: 11,
+    color: COLORS.sage,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
-  safetyContent: { flex: 1 },
-  safetyTitle: { fontSize: 12, fontWeight: '700', color: COLORS.danger, marginBottom: 2 },
-  safetyFlag: { fontSize: 12, color: COLORS.danger, lineHeight: 18 },
+
+  // ── Body content ──
   summary: {
+    fontFamily: 'DMSans_400Regular',
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: COLORS.sage,
     lineHeight: 20,
+    marginHorizontal: 20,
     marginBottom: 16,
     fontStyle: 'italic',
   },
   orderDetails: {
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.canopy,
     borderRadius: 12,
     padding: 12,
+    marginHorizontal: 20,
     marginBottom: 14,
   },
   sectionLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: COLORS.textMuted,
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 10,
+    color: COLORS.sage,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.2,
     marginBottom: 8,
+    marginHorizontal: 20,
+    marginTop: 4,
   },
   detailGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  detailText: { fontSize: 13, color: COLORS.textPrimary, lineHeight: 20 },
-  allergyDetail: { fontSize: 13, color: COLORS.danger, fontWeight: '600', lineHeight: 20 },
+  detailText: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+    color: COLORS.parchment,
+    lineHeight: 20,
+  },
   missingInfo: {
-    backgroundColor: '#FEF9EC',
+    backgroundColor: COLORS.canopy,
     borderRadius: 10,
     padding: 12,
+    marginHorizontal: 20,
     marginBottom: 14,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.mustard,
   },
-  missingInfoTitle: { fontSize: 12, fontWeight: '700', color: '#A06820', marginBottom: 4 },
-  missingInfoItem: { fontSize: 12, color: '#A06820', lineHeight: 18 },
+  missingInfoTitle: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 11,
+    color: COLORS.mustard,
+    marginBottom: 4,
+  },
+  missingInfoItem: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 12,
+    color: COLORS.mustard,
+    lineHeight: 18,
+    opacity: 0.85,
+  },
+
+  // ── Messages ──
   messageBubble: {
     maxWidth: '85%',
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 8,
     marginBottom: 8,
+    marginHorizontal: 20,
   },
-  inbound: { backgroundColor: COLORS.background, alignSelf: 'flex-start' },
-  outbound: { backgroundColor: COLORS.primary, alignSelf: 'flex-end' },
-  messageText: { fontSize: 13, color: COLORS.textPrimary, lineHeight: 20 },
-  outboundText: { color: COLORS.cream },
-  quoteSection: { marginBottom: 14 },
+  inbound: {
+    backgroundColor: COLORS.canopy,
+    alignSelf: 'flex-start',
+  },
+  outbound: {
+    backgroundColor: COLORS.fern,
+    alignSelf: 'flex-end',
+  },
+  messageText: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+    color: COLORS.parchment,
+    lineHeight: 20,
+  },
+  outboundText: { color: COLORS.parchment },
+
+  // ── Quote editor ──
+  quoteSection: { marginBottom: 14, marginHorizontal: 20 },
   quoteRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  dollarSign: { fontSize: 22, fontWeight: '700', color: COLORS.primary },
+  dollarSign: {
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 28,
+    color: COLORS.mustard,
+  },
   quoteInput: {
     flex: 1,
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.primary,
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 28,
+    color: COLORS.mustard,
     borderBottomWidth: 2,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.wood,
     paddingBottom: 4,
   },
-  draftSection: { marginBottom: 16 },
+
+  // ── Draft reply ──
+  draftSection: { marginBottom: 16, marginHorizontal: 20 },
   draftInput: {
     borderWidth: 1.5,
-    borderColor: COLORS.border,
+    borderColor: COLORS.wood,
     borderRadius: 12,
     padding: 12,
+    fontFamily: 'DMSans_400Regular',
     fontSize: 14,
-    color: COLORS.textPrimary,
+    color: COLORS.parchment,
     lineHeight: 22,
     minHeight: 100,
     textAlignVertical: 'top',
+    backgroundColor: COLORS.canopy,
   },
+
+  // ── Action hints ──
   actionHints: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingTop: 8,
+    paddingBottom: 4,
+    paddingHorizontal: 20,
   },
-  hint: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  hintText: { fontSize: 12, color: COLORS.textMuted },
+  hint: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  hintText: {
+    fontFamily: 'DMSans_500Medium',
+    fontSize: 12,
+    color: COLORS.sage,
+  },
+
+  // ── Swipe indicators ──
   swipeIndicator: {
     position: 'absolute',
     top: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
-    borderWidth: 3,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 10,
+    borderWidth: 2.5,
     zIndex: 10,
   },
   swipeRight: {
     right: 20,
-    borderColor: COLORS.primary,
-    backgroundColor: 'rgba(89,123,96,0.1)',
+    borderColor: COLORS.mustard,
+    backgroundColor: COLORS.canopy,
   },
   swipeLeft: {
     left: 20,
-    borderColor: COLORS.sageTan,
-    backgroundColor: 'rgba(207,196,157,0.15)',
+    borderColor: COLORS.sage,
+    backgroundColor: COLORS.canopy,
   },
   swipeUp: {
     top: 20,
     alignSelf: 'center',
     borderColor: COLORS.terracotta,
-    backgroundColor: 'rgba(216,150,132,0.1)',
+    backgroundColor: COLORS.canopy,
   },
-  swipeIndicatorText: { fontSize: 13, fontWeight: '800', color: COLORS.deepGreen },
+  swipeRightText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 13,
+    color: COLORS.mustard,
+  },
+  swipeLeftText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 13,
+    color: COLORS.sage,
+  },
+  swipeUpText: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 13,
+    color: COLORS.terracotta,
+  },
 });

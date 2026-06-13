@@ -14,11 +14,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+import { Plus, ChevronDown, ChevronUp, ChevronRight, X, Sparkles } from 'lucide-react-native';
 import { COLORS } from '../constants/colors';
 import { useThreads } from '../hooks/useThreads';
 import ThreadItem from '../components/ThreadItem';
 import UndoToast from '../components/UndoToast';
+import SectionDivider from '../components/botanical/SectionDivider';
+import GrowthStageIcon from '../components/botanical/GrowthStageIcon';
 import { callIntakeMessage, callGetCustomers } from '../api/client';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import type { Customer, Thread } from '../types';
@@ -91,29 +93,32 @@ export default function InboxScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.wordmark}>🌱 Sprout</Text>
+          <Text style={styles.wordmark}>Sprout</Text>
           <Text style={styles.headerSub}>Your inbox</Text>
         </View>
         <TouchableOpacity style={styles.pasteBtn} onPress={() => setPasteModalVisible(true)}>
-          <Ionicons name="add" size={20} color={COLORS.cream} />
+          <Plus size={18} color={COLORS.forest} strokeWidth={2.5} />
           <Text style={styles.pasteBtnText}>Paste message</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scroll}>
-        {/* Flash card CTA */}
+      <ScrollView style={styles.scroll} backgroundColor={COLORS.forest}>
+        {/* Flashcard CTA banner */}
         {totalNeedsReply > 0 && (
           <TouchableOpacity
             style={styles.flashcardBanner}
             onPress={() => navigation.navigate('FlashcardStack')}
             activeOpacity={0.8}
           >
-            <View>
-              <Text style={styles.flashcardTitle}>{totalNeedsReply} message{totalNeedsReply > 1 ? 's' : ''} waiting</Text>
-              <Text style={styles.flashcardSub}>Tap to review & respond</Text>
+            <GrowthStageIcon stage="seed" size={32} color={COLORS.mustard} />
+            <View style={styles.flashcardText}>
+              <Text style={styles.flashcardTitle}>
+                {totalNeedsReply} message{totalNeedsReply > 1 ? 's' : ''} waiting
+              </Text>
+              <Text style={styles.flashcardSub}>Tap to review and respond</Text>
             </View>
             <View style={styles.flashcardArrow}>
-              <Ionicons name="chevron-forward" size={20} color={COLORS.cream} />
+              <ChevronRight size={18} color={COLORS.forest} strokeWidth={2.5} />
             </View>
           </TouchableOpacity>
         )}
@@ -121,7 +126,7 @@ export default function InboxScreen() {
         {/* Needs Reply */}
         {needsReply.length > 0 && (
           <View>
-            <Text style={styles.sectionHeader}>Needs Reply</Text>
+            <SectionDivider label="Needs Reply" style={styles.sectionDivider} />
             {needsReply.map(thread => (
               <ThreadItem
                 key={thread.id}
@@ -136,7 +141,7 @@ export default function InboxScreen() {
         {/* Parked */}
         {parked.length > 0 && (
           <View>
-            <Text style={styles.sectionHeader}>Parked</Text>
+            <SectionDivider label="Parked" style={styles.sectionDivider} />
             {parked.map(thread => (
               <ThreadItem
                 key={thread.id}
@@ -155,14 +160,13 @@ export default function InboxScreen() {
               style={styles.collapsibleHeader}
               onPress={() => setWaitingExpanded(e => !e)}
             >
-              <Text style={styles.sectionHeader}>
-                Waiting on Customer ({waitingOnCustomer.length})
-              </Text>
-              <Ionicons
-                name={waitingExpanded ? 'chevron-up' : 'chevron-down'}
-                size={16}
-                color={COLORS.textMuted}
+              <SectionDivider
+                label={`Waiting on Customer (${waitingOnCustomer.length})`}
+                style={styles.collapsibleDivider}
               />
+              {waitingExpanded
+                ? <ChevronUp size={14} color={COLORS.sage} strokeWidth={2} />
+                : <ChevronDown size={14} color={COLORS.sage} strokeWidth={2} />}
             </TouchableOpacity>
             {waitingExpanded &&
               waitingOnCustomer.map(thread => (
@@ -179,7 +183,7 @@ export default function InboxScreen() {
         {/* Empty state */}
         {!loading && needsReply.length === 0 && parked.length === 0 && waitingOnCustomer.length === 0 && (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>🎂</Text>
+            <GrowthStageIcon stage="bloom" size={72} color={COLORS.sage} />
             <Text style={styles.emptyTitle}>All caught up!</Text>
             <Text style={styles.emptyText}>
               Paste a customer message to get started.
@@ -202,7 +206,7 @@ export default function InboxScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Paste Customer Message</Text>
             <TouchableOpacity onPress={() => setPasteModalVisible(false)}>
-              <Ionicons name="close" size={24} color={COLORS.textPrimary} />
+              <X size={22} color={COLORS.parchment} strokeWidth={2} />
             </TouchableOpacity>
           </View>
 
@@ -211,20 +215,22 @@ export default function InboxScreen() {
             <TextInput
               style={styles.modalInput}
               placeholder="e.g. Sarah Johnson"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={COLORS.sage}
               value={customerName}
               onChangeText={setCustomerName}
+              keyboardAppearance="dark"
             />
 
             <Text style={styles.fieldLabel}>Message *</Text>
             <TextInput
               style={[styles.modalInput, styles.modalTextarea]}
               placeholder="Paste the customer's message here..."
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={COLORS.sage}
               value={pasteText}
               onChangeText={setPasteText}
               multiline
               autoFocus
+              keyboardAppearance="dark"
             />
           </ScrollView>
 
@@ -234,9 +240,9 @@ export default function InboxScreen() {
               onPress={handlePasteSubmit}
               disabled={submitting}
             >
-              <Ionicons name="sparkles" size={18} color={COLORS.cream} />
+              <Sparkles size={16} color={COLORS.forest} strokeWidth={2} />
               <Text style={styles.submitPasteText}>
-                {submitting ? 'Processing…' : 'Process with AI'}
+                {submitting ? 'Processing...' : 'Process with AI'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -249,97 +255,132 @@ export default function InboxScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.forest },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: COLORS.surface,
+    paddingVertical: 14,
+    backgroundColor: COLORS.forest,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.wood,
   },
-  wordmark: { fontSize: 20, fontWeight: '800', color: COLORS.deepGreen },
-  headerSub: { fontSize: 12, color: COLORS.textMuted, marginTop: 1 },
+  wordmark: {
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 24,
+    color: COLORS.parchment,
+  },
+  headerSub: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 12,
+    color: COLORS.sage,
+    marginTop: 1,
+  },
   pasteBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.mustard,
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 9,
     borderRadius: 50,
+    minHeight: 44,
   },
-  pasteBtnText: { color: COLORS.cream, fontWeight: '600', fontSize: 13 },
-  scroll: { flex: 1 },
-  flashcardBanner: {
-    margin: 16,
-    backgroundColor: COLORS.primary,
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  pasteBtnText: {
+    fontFamily: 'DMSans_600SemiBold',
+    color: COLORS.forest,
+    fontSize: 13,
   },
-  flashcardTitle: { fontSize: 16, fontWeight: '700', color: COLORS.cream },
-  flashcardSub: { fontSize: 13, color: COLORS.lightGreen, marginTop: 2 },
-  flashcardArrow: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.primaryDark,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sectionHeader: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 6,
+  scroll: { flex: 1, backgroundColor: COLORS.forest },
+  sectionDivider: {
+    marginTop: 8,
   },
   collapsibleHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 6,
+    paddingRight: 16,
   },
-  emptyState: { alignItems: 'center', paddingTop: 80, paddingHorizontal: 32 },
-  emptyIcon: { fontSize: 56, marginBottom: 16 },
-  emptyTitle: { fontSize: 20, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 8 },
-  emptyText: { fontSize: 15, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 22 },
-  modal: { flex: 1, backgroundColor: COLORS.background },
+  collapsibleDivider: {
+    flex: 1,
+  },
+  flashcardBanner: {
+    margin: 16,
+    backgroundColor: COLORS.canopy,
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: COLORS.wood,
+  },
+  flashcardText: {
+    flex: 1,
+  },
+  flashcardTitle: {
+    fontFamily: 'DMSans_700Bold',
+    fontSize: 16,
+    color: COLORS.parchment,
+  },
+  flashcardSub: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 13,
+    color: COLORS.sage,
+    marginTop: 2,
+  },
+  flashcardArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: COLORS.mustard,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyState: { alignItems: 'center', paddingTop: 80, paddingHorizontal: 32, gap: 12 },
+  emptyTitle: {
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 22,
+    color: COLORS.parchment,
+  },
+  emptyText: {
+    fontFamily: 'DMSans_400Regular',
+    fontSize: 15,
+    color: COLORS.sage,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  modal: { flex: 1, backgroundColor: COLORS.canopy },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    backgroundColor: COLORS.surface,
+    borderBottomColor: COLORS.wood,
+    backgroundColor: COLORS.palm,
   },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: COLORS.textPrimary },
-  modalBody: { flex: 1, padding: 20 },
+  modalTitle: {
+    fontFamily: 'Fraunces_700Bold',
+    fontSize: 18,
+    color: COLORS.parchment,
+  },
+  modalBody: { flex: 1, padding: 20, backgroundColor: COLORS.canopy },
   fieldLabel: {
+    fontFamily: 'DMSans_600SemiBold',
     fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
+    color: COLORS.parchment,
     marginBottom: 8,
   },
   modalInput: {
     borderWidth: 1.5,
-    borderColor: COLORS.border,
-    borderRadius: 12,
+    borderColor: COLORS.wood,
+    borderRadius: 10,
     padding: 12,
+    fontFamily: 'DMSans_400Regular',
     fontSize: 15,
-    color: COLORS.textPrimary,
-    backgroundColor: COLORS.surface,
+    color: COLORS.parchment,
+    backgroundColor: COLORS.palm,
     marginBottom: 16,
   },
   modalTextarea: { minHeight: 160, textAlignVertical: 'top' },
@@ -347,11 +388,11 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: Platform.OS === 'ios' ? 34 : 20,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    backgroundColor: COLORS.surface,
+    borderTopColor: COLORS.wood,
+    backgroundColor: COLORS.palm,
   },
   submitPasteBtn: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.mustard,
     borderRadius: 50,
     paddingVertical: 16,
     flexDirection: 'row',
@@ -360,5 +401,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   submitPasteBtnDisabled: { opacity: 0.5 },
-  submitPasteText: { color: COLORS.cream, fontWeight: '700', fontSize: 16 },
+  submitPasteText: {
+    fontFamily: 'DMSans_700Bold',
+    color: COLORS.forest,
+    fontSize: 16,
+  },
 });
